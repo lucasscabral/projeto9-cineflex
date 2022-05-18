@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+.cabecalho{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 67px;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    background-color: #C3CFD9;
+    color: #E8833A;
+    font-size: 34px;
+    font-family: 'Roboto', sans-serif;
+}
