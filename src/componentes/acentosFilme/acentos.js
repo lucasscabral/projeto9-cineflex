@@ -1,21 +1,83 @@
 import styled from "styled-components"
 import  {useState,useEffect}  from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams,useNavigate} from "react-router-dom";
+import "../acentosFilme/estilos.css"
+import Sucesso from "../SucessoSessao/sucesso";
+
+
+function AcentosListados({setIdAcento,idAcento,acentoId,acentoName,acentoIsAvailable}){
+    const[escolhido,setEscolhido] = useState(true);
+    console.log(idAcento)
+    /*function IdAcento (){
+        setIdAcento([...idAcento,acentoId]);
+        console.log(idAcento)
+    }*/
+    function escolherAcento(){
+        console.log("deu certo")
+        setEscolhido(true)
+        setIdAcento([...acentoId])
+        console.log([idAcento.push(acentoId)])
+        console.log("deu certo")
+    }
+
+
+    function acentoIndisponivel(){
+        alert("Esse assento não está disponível");
+    }
+
+
+    return(
+                   
+                    acentoIsAvailable? escolhido === true ?<UnidAcentos onClick={()=> setEscolhido(false)}>
+                                            <span>{acentoName}</span>
+                                        </UnidAcentos>: <AcentoSelecionado onClick={() => escolherAcento}>
+                                                        <span>{acentoName}</span>
+                                                    </AcentoSelecionado>: <Reservado onClick={acentoIndisponivel}>
+                                                                    <span>{acentoName}</span>
+                                                                    </Reservado>
+                   
+    )
+}
+
+
 
 export default function Acentos(){
     const[listaAcentos,setListaAcentos] = useState({});
+    const[nome,setNome]= useState("");
+    const[cpf,setCpf]= useState();
     const {idSessao} = useParams();
-    console.log(idSessao)
+    const[idAcento,setIdAcento]= useState([]);
+    console.log(idAcento)
+
+    const nav = useNavigate();
+  
 
     useEffect(() =>{
         const promise = axios.get(`https://mock-api.driven.com.br/api/v5/cineflex/showtimes/${idSessao}/seats`)
         promise.then(response =>{
             setListaAcentos({...response.data})
+        }).catch(err =>{
+            console.log(err.data)
         })
     },[])
 
-    console.log(listaAcentos)
+    function reservaSessao(event){
+        event.preventDefault();
+        const body ={
+            ids: idAcento,    
+            name:nome,
+            cpf
+        }
+        
+        const promise = axios.post("https://mock-api.driven.com.br/api/v5/cineflex/seats/book-many",body);
+        promise.then(response =>{
+            nav.push("/sucesso")
+        })
+
+        console.log(body)
+    }
+
 
     return(
         <>
@@ -24,10 +86,9 @@ export default function Acentos(){
                     <span>Selecione o(s) assento(s)</span>
                 </TituloAcentos>
                 <TodosAcentos>
-                    
-                    <UnidAcentos>
-                        <span>10</span>
-                    </UnidAcentos>
+                    {
+                        listaAcentos.seats?.map(value => <AcentosListados setIdAcento={setIdAcento} idAcento={idAcento} acentoId={value.id} acentoName={value.name} acentoIsAvailable={value.isAvailable}/>)
+                    }                    
                     <IformacoesAcentos>
                         <Selecionado>
                             <div></div>
@@ -43,23 +104,23 @@ export default function Acentos(){
                         </Indisponivel>
                     </IformacoesAcentos>
                 </TodosAcentos>
-                <Formulario>
+                <Formulario onSubmit={reservaSessao}>
                     <label>Nome do comprador:</label>
-                    <input placeholder="Digite seu nome..." required/>
+                    <input placeholder="Digite seu nome..." value={nome} onChange={(e)=> setNome(e.target.value)} required/>
                     <label>CPF do comprador:</label>
-                    <input placeholder="Digite seu nome..." required/>
-                    <button type="submit">Reservar assento(s)</button> 
+                    <input placeholder="Digite seu CPF..." value={cpf} onChange={(e)=> setCpf(e.target.value)} required/>
+                    <button onClick={reservaSessao}>Reservar assento(s)</button> 
                 </Formulario>
-            </ConteudoAcentos>
-            <RodaPe>
-                <ImageFilme>
-                    <img src="" alt='image-filme'/>
-                </ImageFilme>
-                <NomeFilme>
-                    <h1>Dragon Ball</h1>
-                    <span>Asjbnjeb jqbjebjks b jkabjebjkbnjkqw</span>
-                </NomeFilme>
-            </RodaPe>
+            </ConteudoAcentos>       
+            {listaAcentos.movie === undefined? "":<RodaPe id={listaAcentos.movie.id}>
+                                                    <ImageFilme>
+                                                        <img src={listaAcentos.movie.posterURL} alt='image-filme'/>
+                                                    </ImageFilme>
+                                                    <NomeFilme>
+                                                        <h1>{listaAcentos.movie.title}</h1>
+                                                        <span>{listaAcentos.day.weekday} - {listaAcentos.name}</span>
+                                                    </NomeFilme>
+                                                 </RodaPe>}
          </>
     )
 }
@@ -121,6 +182,20 @@ const Selecionado = styled.div`
     border-radius: 17px;
     }
 `;
+const AcentoSelecionado = styled.div`
+    width: 26px;
+    height: 26px;
+    margin-right: 7px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    background: #8DD7CF;
+    border: 1px solid #1AAE9E;
+    border-radius: 50px;
+    cursor: pointer;
+`;
+
 const Disponivel = styled.div`
     display: flex;
     flex-direction: column;
@@ -150,6 +225,20 @@ const Indisponivel = styled.div`
     }
 `;
 
+const Reservado = styled.div`
+  width: 26px;
+    height: 26px;
+    margin-right: 7px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #FBE192;
+    border: 1px solid #F7C52B;
+    border-radius: 50px;
+    cursor: pointer;
+`;
+
 const Formulario = styled.form`
     margin-top: 20px;
     display: flex;
@@ -177,6 +266,10 @@ const Formulario = styled.form`
     background: #E8833A;
     border-radius: 3px;
     border: none;
+    font-weight: 400;
+    font-size: 18px;
+    color: white;
+    cursor: pointer;
     }
     
 `;
