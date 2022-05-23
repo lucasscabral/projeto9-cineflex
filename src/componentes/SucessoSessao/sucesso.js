@@ -1,7 +1,14 @@
 import axios from "axios";
 import styled from "styled-components"
+import { useLocation } from "react-router-dom";
 
-export default function Sucesso(){
+
+
+export default function Sucesso(navegation){
+    console.log(navegation)
+    const corpoSucesso = useLocation();
+    console.log(corpoSucesso)
+
     return(
         <>
             <ConteudoSucesso>

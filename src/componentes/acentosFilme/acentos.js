@@ -1,24 +1,26 @@
 import styled from "styled-components"
 import  {useState,useEffect}  from "react";
 import axios from "axios";
-import { useParams,useNavigate} from "react-router-dom";
+import { useParams,useLocation} from "react-router-dom";
 import "../acentosFilme/estilos.css"
 import Sucesso from "../SucessoSessao/sucesso";
 
 
 function AcentosListados({setIdAcento,idAcento,acentoId,acentoName,acentoIsAvailable}){
     const[escolhido,setEscolhido] = useState(true);
-    console.log(idAcento)
-    /*function IdAcento (){
-        setIdAcento([...idAcento,acentoId]);
-        console.log(idAcento)
-    }*/
-    function escolherAcento(){
+    
+    function selecAcento (escolhido){
+        setEscolhido(!escolhido)
+        setIdAcento([...idAcento,acentoId])
+    }
+
+    function escolherAcento(escolhido){
         console.log("deu certo")
-        setEscolhido(true)
-        setIdAcento([...acentoId])
-        console.log([idAcento.push(acentoId)])
-        console.log("deu certo")
+        setEscolhido(!escolhido)
+        let contadorId = setIdAcento(idAcento.filter((value,id) => id !== acentoId))
+        //setIdAcento([...contadorId])
+        //console.log([idAcento.push(acentoId)])
+        console.log(contadorId)
     }
 
 
@@ -29,9 +31,9 @@ function AcentosListados({setIdAcento,idAcento,acentoId,acentoName,acentoIsAvail
 
     return(
                    
-                    acentoIsAvailable? escolhido === true ?<UnidAcentos onClick={()=> setEscolhido(false)}>
+                    acentoIsAvailable? escolhido === true ?<UnidAcentos onClick={()=> selecAcento(escolhido)}>
                                             <span>{acentoName}</span>
-                                        </UnidAcentos>: <AcentoSelecionado onClick={() => escolherAcento}>
+                                        </UnidAcentos>: <AcentoSelecionado onClick={() => escolherAcento(escolhido)}>
                                                         <span>{acentoName}</span>
                                                     </AcentoSelecionado>: <Reservado onClick={acentoIndisponivel}>
                                                                     <span>{acentoName}</span>
@@ -50,7 +52,7 @@ export default function Acentos(){
     const[idAcento,setIdAcento]= useState([]);
     console.log(idAcento)
 
-    const nav = useNavigate();
+    const nav = useLocation();
   
 
     useEffect(() =>{
@@ -58,7 +60,7 @@ export default function Acentos(){
         promise.then(response =>{
             setListaAcentos({...response.data})
         }).catch(err =>{
-            console.log(err.data)
+            //console.log(err.data)
         })
     },[])
 
@@ -71,6 +73,8 @@ export default function Acentos(){
         }
         
         const promise = axios.post("https://mock-api.driven.com.br/api/v5/cineflex/seats/book-many",body);
+        console.log(promise);
+
         promise.then(response =>{
             nav.push("/sucesso")
         })
@@ -78,6 +82,13 @@ export default function Acentos(){
         console.log(body)
     }
 
+    function validarAcentos(){
+        if(idAcento[0] === undefined){
+            alert("É necessario selecionar pelo menos um acento para validar sua reserva de acento")
+            setNome("");
+            setCpf("");
+        }
+    }
 
     return(
         <>
@@ -105,11 +116,11 @@ export default function Acentos(){
                     </IformacoesAcentos>
                 </TodosAcentos>
                 <Formulario onSubmit={reservaSessao}>
-                    <label>Nome do comprador:</label>
-                    <input placeholder="Digite seu nome..." value={nome} onChange={(e)=> setNome(e.target.value)} required/>
+                    <label for="campoNome">Nome do comprador:</label>
+                    <input type="text" id="campoNome" placeholder="Digite seu nome..." value={nome} onChange={(e)=> setNome(e.target.value)} required/>
                     <label>CPF do comprador:</label>
-                    <input placeholder="Digite seu CPF..." value={cpf} onChange={(e)=> setCpf(e.target.value)} required/>
-                    <button onClick={reservaSessao}>Reservar assento(s)</button> 
+                    <input type="number" placeholder="Digite seu CPF..." value={cpf} onChange={(e)=> setCpf(e.target.value)} required/>
+                    <button type="submit" onClick={validarAcentos}>Reservar assento(s)</button> 
                 </Formulario>
             </ConteudoAcentos>       
             {listaAcentos.movie === undefined? "":<RodaPe id={listaAcentos.movie.id}>

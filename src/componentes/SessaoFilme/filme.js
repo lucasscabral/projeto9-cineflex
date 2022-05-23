@@ -12,7 +12,7 @@ function Horarios ({filmeId,dia,data,sessoes}){
                                             <span>{dia} - {data}</span>
                                             <BotoesSessoes >
                                                 {
-                                                    sessoes.map(value =>   <Link to={`/assentos/${value.id}`}>
+                                                    sessoes.map(value =>   <Link to={`/assentos/${value.id}`}style={{ textDecoration: "none" }}>
                                                                                 <Botoes >
                                                                                         <span>{value.name}</span>
                                                                                 </Botoes>
