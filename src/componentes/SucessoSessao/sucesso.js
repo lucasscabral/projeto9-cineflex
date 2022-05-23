@@ -1,14 +1,16 @@
-import axios from "axios";
 import styled from "styled-components"
-import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
+export default function Sucesso({dados,dadosFilme,nameAcento}){
+    let numberArray = nameAcento.map(Number);
+    numberArray.sort((a,b) => a - b) // funcao para ordernar de forma crescente os acentos
 
+    let navigate = useNavigate();
 
-export default function Sucesso(navegation){
-    console.log(navegation)
-    const corpoSucesso = useLocation();
-    console.log(corpoSucesso)
-
+    function voltarHome(){
+        navigate("/");
+    }
+    
     return(
         <>
             <ConteudoSucesso>
@@ -17,21 +19,22 @@ export default function Sucesso(navegation){
                 </TituloSucesso>
                 <FilmeSessao>
                     <h2>Filme e sessão</h2>
-                    <span>Enola Holmes</span>
-                    <span>24/06/2021 15:00</span>
+                    <span>{dadosFilme.movie.title}</span>
+                    <span>{dadosFilme.day.date} {dadosFilme.name}</span>
                 </FilmeSessao>
                 <Ingressos>
                     <h2>Ingressos</h2>
-                    <span>Assento 15</span>
-                    <span>Assento 16</span>
+                    {
+                        numberArray.map(value => <span>Assento {value}</span>)
+                    }
                 </Ingressos>
                 <Comprador>
                     <h2>Comprador</h2>
-                    <span>Nome: João da Silva Sauro</span>
-                    <span>CPF: 123.456.789-10</span>
+                    <span>Nome: {dados.name}</span>
+                    <span>CPF: {dados.cpf}</span>
                 </Comprador>
                 <Botao>
-                    <button>Voltar pra Home</button>
+                    <button onClick={voltarHome}>Voltar pra Home</button>
                 </Botao>
             </ConteudoSucesso>
         </>
@@ -97,5 +100,6 @@ const Botao = styled.div`
         font-weight: 400;
         font-size: 18px;
         color: white;
+        cursor: pointer;
     }
 `;

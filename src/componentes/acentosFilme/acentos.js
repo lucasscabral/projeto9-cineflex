@@ -1,26 +1,22 @@
 import styled from "styled-components"
 import  {useState,useEffect}  from "react";
 import axios from "axios";
-import { useParams,useLocation} from "react-router-dom";
+import { useParams,useNavigate} from "react-router-dom";
 import "../acentosFilme/estilos.css"
-import Sucesso from "../SucessoSessao/sucesso";
 
 
-function AcentosListados({setIdAcento,idAcento,acentoId,acentoName,acentoIsAvailable}){
+function AcentosListados({setIdAcento,idAcento,acentoId,acentoName,acentoIsAvailable,setNameAcento,nameAcento}){
     const[escolhido,setEscolhido] = useState(true);
     
     function selecAcento (escolhido){
         setEscolhido(!escolhido)
         setIdAcento([...idAcento,acentoId])
+        setNameAcento([...nameAcento,acentoName])
     }
 
     function escolherAcento(escolhido){
-        console.log("deu certo")
         setEscolhido(!escolhido)
-        let contadorId = setIdAcento(idAcento.filter((value,id) => id !== acentoId))
-        //setIdAcento([...contadorId])
-        //console.log([idAcento.push(acentoId)])
-        console.log(contadorId)
+        setIdAcento(idAcento.filter((value,id) => id !== acentoId))
     }
 
 
@@ -44,23 +40,23 @@ function AcentosListados({setIdAcento,idAcento,acentoId,acentoName,acentoIsAvail
 
 
 
-export default function Acentos(){
+export default function Acentos({setDados,setDadosFilme,setNameAcento,nameAcento}){
     const[listaAcentos,setListaAcentos] = useState({});
     const[nome,setNome]= useState("");
     const[cpf,setCpf]= useState();
     const {idSessao} = useParams();
     const[idAcento,setIdAcento]= useState([]);
-    console.log(idAcento)
 
-    const nav = useLocation();
+    let navigate = useNavigate();
   
 
     useEffect(() =>{
         const promise = axios.get(`https://mock-api.driven.com.br/api/v5/cineflex/showtimes/${idSessao}/seats`)
-        promise.then(response =>{
+        promise
+        .then(response =>{
             setListaAcentos({...response.data})
         }).catch(err =>{
-            //console.log(err.data)
+
         })
     },[])
 
@@ -73,13 +69,13 @@ export default function Acentos(){
         }
         
         const promise = axios.post("https://mock-api.driven.com.br/api/v5/cineflex/seats/book-many",body);
-        console.log(promise);
 
         promise.then(response =>{
-            nav.push("/sucesso")
+            setDados(body)
+            setDadosFilme(listaAcentos)
+            navigate("/sucesso")
         })
 
-        console.log(body)
     }
 
     function validarAcentos(){
@@ -98,7 +94,7 @@ export default function Acentos(){
                 </TituloAcentos>
                 <TodosAcentos>
                     {
-                        listaAcentos.seats?.map(value => <AcentosListados setIdAcento={setIdAcento} idAcento={idAcento} acentoId={value.id} acentoName={value.name} acentoIsAvailable={value.isAvailable}/>)
+                        listaAcentos.seats?.map(value => <AcentosListados setIdAcento={setIdAcento} idAcento={idAcento} acentoId={value.id} acentoName={value.name} acentoIsAvailable={value.isAvailable} setNameAcento={setNameAcento} nameAcento={nameAcento}/>)
                     }                    
                     <IformacoesAcentos>
                         <Selecionado>
@@ -116,7 +112,7 @@ export default function Acentos(){
                     </IformacoesAcentos>
                 </TodosAcentos>
                 <Formulario onSubmit={reservaSessao}>
-                    <label for="campoNome">Nome do comprador:</label>
+                    <label htmlFor="campoNome">Nome do comprador:</label>
                     <input type="text" id="campoNome" placeholder="Digite seu nome..." value={nome} onChange={(e)=> setNome(e.target.value)} required/>
                     <label>CPF do comprador:</label>
                     <input type="number" placeholder="Digite seu CPF..." value={cpf} onChange={(e)=> setCpf(e.target.value)} required/>
@@ -156,6 +152,17 @@ const TodosAcentos = styled.div`
     flex-wrap: wrap;
     padding: 10px 6px;
 `;
+
+const PaginaAnterior = styled.div`
+    ion-icon{
+        font-size: 35px;
+        color:  lightblue;
+        position: fixed;
+        top: 95px;
+        left: 20px;
+    }
+`;
+
 const UnidAcentos = styled.div`
     width: 26px;
     height: 26px;
